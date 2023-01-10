@@ -30,7 +30,7 @@ var applessMobile = {
     path: path.resolve(__dirname, "dist"),
     pathinfo: true,
     sourceMapFilename: "appless-mobile.min.js.map",
-    library: "MobileAppless",
+    library: "ApplessMobile",
     libraryTarget: "window",
     libraryExport: "default"
   },
