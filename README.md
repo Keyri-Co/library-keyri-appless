@@ -52,3 +52,72 @@ You can import the library by adding this repo as a dependency, or use our CDN. 
 
 n.b. the CDN version exposes a global variable called `ApplessMobile` which is the same as you'd get by importing in from a module
 
+#### The HTML
+
+Somewhere on KeyriMobile.html you need a script to do the following:
+
+```html
+    <script type="module">
+      const appKey = "113ce3c2-5ed7-11ed-9b6a-0242ac120002";
+      const env = "prod";
+    
+      let mobileAppless = new ApplessMobile(env,appKey);
+      await mobileAppless.start();
+    </script>
+```
+
+#### You're done with KeyriMobile.html
+
+Yup.
+
+## 3. Login.html
+
+You can import the library by adding this repo as a dependency, or use our CDN. Whatever's clever.
+
+#### MODULAR
+
+```js
+ // login.js
+  import { ApplessLocal } from "library-keyri-appless";
+```
+
+
+#### CDN
+```html
+    <script crossorigin="anonymous" src="https://s3.us-east-2.amazonaws.com/static.keyri.com/library-keyri-connect/appless-local.min.js" integrity="sha384-UO+RjBYcvxTZeJZiFEr+B7c8g1jxpO04mqxihyG5v0gOSk/LZxz1pw4qKQqu8yJ/" ></script>
+```
+
+n.b. the CDN version exposes a global variable called `ApplessLocal` which is the same as you'd get by importing in from a module.
+
+#### HTML
+
+This is pretty unique to whatever you're doing. I'll try to keep it as simple and generic as possible. (I hate when people get cute demo'ing things without covering the basics so I'll try not to do it)
+
+```html
+<script type="module">
+  //
+  // I'll go ahead and put the WebAuth Methods here just to demo
+  //
+  let localAppless = new LocalAppless();
+
+
+  const RP_API_REGISTER_URL = "https://api.bank.com/rp/register";
+  const USER_FIREBASE_TOKEN = "010203040506070809";
+  const QR_IFRAME = document.getElementById("qr-frame");
+
+
+  //
+  // I want to expose methods to window
+  // so the buttons can have access to them. I'm sure in a real
+  // framework, this isn't a thing; but here...meh: it gets the
+  // job done...
+  //
+  window.registerMobile = () => { localAppless.registerMobile(RP_API_REGISTER_URL, USER_FIREBASE_TOKEN, QR_IFRAME); }
+  window.registerLocal = () => {localAppless.register(RP_API_REGISTER_URL, USER_FIREBASE_TOKEN).then((d) => {console.log({here_is_data: d})}); }
+  window.verifyLocal = () => { localAppless.authenticate().then((d) => {console.log({here_is_data: d})}); }
+
+
+</script>
+
+```
+
