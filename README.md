@@ -143,3 +143,10 @@ This is pretty unique to whatever you're doing. I'll try to keep it as simple an
 </script>
 ```
 
+## 4. Relying Party API - Endpoints
+
+This you can set up pretty much wherever you want to, however you want to. You'll need two endpoints:
+
+`/register` and `/verify` (they can be named whatever).
+
+
