@@ -132,10 +132,10 @@ export default class LocalAppless {
     let options = {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: data,
+      body: JSON.stringify(data),
     };
 
-    let rpResponse = await fetch(url, options).then(async (data) => {
+    let rpResponse = await fetch(this.#RP_VALIDATE_API_URL, options).then(async (data) => {
       return data.json();
     });
 
