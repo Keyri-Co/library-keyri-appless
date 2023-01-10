@@ -7,3 +7,4 @@ configs/*.js
 dist/*.js
 dist/*.map
 dist/*.txt
+package-lock.json
