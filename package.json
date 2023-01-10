@@ -1,0 +1,19 @@
+{
+  "name": "library-keyri-appless",
+  "version": "1.0.0",
+  "description": "Library for integrating Appless Functionality into Keyri Architecture",
+  "main": "index.js",
+  "devDependencies": {
+    "webpack": "^5.72.1",
+    "webpack-cli": "^4.9.2",
+    "webpack-subresource-integrity": "^5.1.0"
+  },
+  "dependencies": {
+    "ezcrypto": "github:Keyri-Co/EZCrypto",
+    "ezindexdb": "github:Keyri-Co/EZIndexDB",
+    "ezwebauthn": "github:Keyri-Co/EZWebAuthn"
+  },
+  "scripts": {
+    "build": "webpack"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules
+*.bat
+docs/fonts
+docs/scripts
+docs/styles
+configs/*.js
+dist/*.js
+dist/*.map
+dist/*.txt
