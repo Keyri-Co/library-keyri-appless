@@ -2,7 +2,7 @@ const path = require("path");
 
 var applessLocal = {
   devtool: "source-map",
-  entry: "./js/appless-local.js",
+  entry: "./js/browser/index.js",
   mode: "production",
   output: {
     filename: "appless-local.min.js",
@@ -13,19 +13,27 @@ var applessLocal = {
     libraryTarget: "window",
     libraryExport: "default",
   },
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
-      },
-    ],
-  },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
 };
 
 
-module.exports = [connector, applessMobile, applessLocal, qrWorker];
+
+
+var applessMobile = {
+  devtool: "source-map",
+  entry: "./js/mobile/index.js",
+  mode: "production",
+  output: {
+    filename: "appless-mobile.min.js",
+    path: path.resolve(__dirname, "dist"),
+    pathinfo: true,
+    sourceMapFilename: "appless-mobile.min.js.map",
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"],
+  },
+};
+
+module.exports = [applessMobile, applessLocal];
