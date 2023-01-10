@@ -30,6 +30,8 @@ See instructions [here](https://www.google.com)
 
 You can import the library by adding this repo as a dependency, or use our CDN. Whatever's clever.
 
+#### MODULAR
+
 ```js
 // package.json
   "dependencies": {
@@ -41,3 +43,12 @@ You can import the library by adding this repo as a dependency, or use our CDN. 
  // your-cool-javascript-file.js
   import { ApplessMobile } from "library-keyri-appless";
 ```
+
+
+#### CDN
+```html
+    <script crossorigin="anonymous" src="https://s3.us-east-2.amazonaws.com/static.keyri.com/library-keyri-connect/appless-mobile.min.js" integrity="sha384-k0cE1MgO+mFU3FwYIgu0GjXibSVfPUg4n4hsOxYysg1K8MCW9spdIlr35FdwWK1T" ></script>
+```
+
+n.b. the CDN version exposes a global variable called `ApplessMobile` which is the same as you'd get by importing in from a module
+
