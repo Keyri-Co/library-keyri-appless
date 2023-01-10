@@ -101,8 +101,13 @@ This is pretty unique to whatever you're doing. I'll try to keep it as simple an
   let localAppless = new LocalAppless();
 
 
+  // The user needs to send stuff here in order to register their computer / mobile / whatever 
   const RP_API_REGISTER_URL = "https://api.bank.com/rp/register";
+  
+  // For registration, we'll assume the user is logged in, and this is their "Im-logged-in" cookie/token
   const USER_FIREBASE_TOKEN = "010203040506070809";
+  
+  // If you're registering a mobile with QR-Code, I need to modify it - and need reference to it as an element
   const QR_IFRAME = document.getElementById("qr-frame");
 
 
@@ -112,9 +117,18 @@ This is pretty unique to whatever you're doing. I'll try to keep it as simple an
   // framework, this isn't a thing; but here...meh: it gets the
   // job done...
   //
+  let localAppless = new LocalAppless(RP_API_REGISTER_URL, RP_API_VERIFY_URL);
+
+  // n.b. Registration doesn't need verification by the RP since the user is already logged in
   window.registerMobile = () => { localAppless.registerMobile(RP_API_REGISTER_URL, USER_FIREBASE_TOKEN, QR_IFRAME); }
   window.registerLocal = () => {localAppless.register(RP_API_REGISTER_URL, USER_FIREBASE_TOKEN).then((d) => {console.log({here_is_data: d})}); }
-  window.verifyLocal = () => { localAppless.authenticate().then((d) => {console.log({here_is_data: d})}); }
+  
+  
+  // n.b Authentication on the other hand...very much needs RP's assistance
+  window.verifyLocal = async () => { 
+    let authData = await localAppless.authenticate();
+    let authResponse = await localAppless.rp_validate_data(authData);
+  }
 
 
 </script>
