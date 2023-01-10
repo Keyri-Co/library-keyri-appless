@@ -5,8 +5,7 @@
   "main": "index.js",
   "devDependencies": {
     "webpack": "^5.72.1",
-    "webpack-cli": "^4.9.2",
-    "webpack-subresource-integrity": "^5.1.0"
+    "webpack-cli": "^4.9.2"
   },
   "dependencies": {
     "ezcrypto": "github:Keyri-Co/EZCrypto",
