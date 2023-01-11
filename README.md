@@ -149,4 +149,177 @@ This you can set up pretty much wherever you want to, however you want to. You'l
 
 `/register` and `/verify` (they can be named whatever).
 
+```javascript
+// register.js
+
+import EZCrypto from "ezcrypto";
+import bodyParser from "../../src/bodyParser";
+import * as KEYS from "../../config/keys.json";
+import * as fireBaseDataBase from "../../config/fireBaseDataBase.json";
+
+export default async (request) => {
+
+    const ezcrypto = new EZCrypto();
+
+    let body = await bodyParser(request.body);
+    body = JSON.parse(body);
+
+    let data = JSON.parse(atob(body.data));
+    console.log("[API::RP::applessRegisterRequest]",{data});
+
+    //
+    // So in this example, the `metadata` attribute IS the user's
+    // temporary-firebase-token. You can structure it so its a JSON
+    // object, or whatever. You control this server, not me. Whatever
+    // works best for you works best for us...
+    //
+
+    // const userData = await verifyAuthToken(fireBaseAxisToken);
+    const userData = fireBaseDataBase[data.metadata];
+
+    let rpData = {
+      child: body,
+      origin: location.origin.replace(/^.*?\/\//, ""),
+      publicKey: KEYS.publicSignatureKey,
+      timestamp: new Date().getTime().toString(),
+      userDisplayName: userData.email,
+      userId: btoa(userData.uid),
+      metadata: {...userData}
+    };
+
+    rpData = btoa(JSON.stringify(rpData));
+
+    let rpSignature = await ezcrypto.EcSignData(KEYS.privateSignatureKey, rpData);
+
+    return new Response(JSON.stringify({ data: rpData, signature: rpSignature }));
+
+}
+
+```
+
+
+
+```javascript
+// verify.js
+
+//
+// With this route, we verify all of the crypto-crap
+//
+//
+import EZCrypto from "ezcrypto";
+import bodyParser from "../../src/bodyParser";
+import * as KEYS from "../../config/keys.json";
+import * as fireBaseDataBase from "../../config/fireBaseUsers.json";
+
+const API_PUBLIC_KEY =
+  "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWY4300ZcdF1f4kHTKsODvlAb5iVsPJHXY8iDJaGoyi8BgOrYmAuzOlaC9DOLapO5T9z367puBonLM+PhGwemFA==";
+
+export default async (request) => {
+  const ezcrypto = new EZCrypto();
+
+  // THIS IS THE DATA FROM THE API BY WAY OF THE USER.
+  // IT SHOULD HAVE:
+  // - data
+  // - signature
+  //
+  // WHICH COME FROM THE API.
+  // VERIFY THE SIGNATURE COMES FROM THE PUBLIC-KEY
+  // THAT API HAS
+  //
+  try {
+    let err;
+
+    let body = await bodyParser(request.body);
+    body = JSON.parse(body);
+
+    let data = JSON.parse(atob(body.data));
+
+    //
+    // API::: First check that the public key in body.data is the same as the API Server's known PublicKey
+    //
+    if (data.publicKey !== API_PUBLIC_KEY) {
+      err = new Error("INVALID PUBLIC KEY FOUND");
+      err.custom = true;
+      throw err;
+    }
+
+    //
+    // API::: Next, check that the signature from the API checks out
+    //
+    try {
+      ezcrypto.EcVerifySig(API_PUBLIC_KEY, body.signature, body.data);
+    } catch (e) {
+      err = new Error("API SIGNATURE ERROR");
+      err.custom = true;
+      throw err;
+    }
+
+    //
+    // API::: Next, Make sure the timestamp is valid to prevent replay attacks
+    //
+    if (Math.abs(data.timestamp - new Date().getTime()) > 10_000) {
+      err = new Error("USER TIMEOUT");
+      err.custom = true;
+      throw err;
+    }
+
+    //
+    // RP::: Verify the data that is stored with the API is ours and is unmanipulated
+    //
+
+
+
+    try {
+
+
+
+      ezcrypto.EcVerifySig(
+        KEYS.publicSignatureKey,
+        data.RPData.data,
+        data.RPData.signature
+      );
+    } catch (e) {
+      err = new Error("RP SIGNATURE ERROR");
+      err.custom = true;
+      throw err;
+    }
+
+    //
+    // RP::: Convert the original data out of base64 and into an object
+    //
+    let rpData = JSON.parse(atob(data.RPData.data));
+
+    //
+    // RP::: Look the user up in firebase or whatever and issue a cookie
+    //
+    let userInfo;
+    try {
+      userInfo = fireBaseDataBase[atob(rpData.userId)];
+    } catch (e) {
+      err = new Error("USER DOES NOT EXIST...");
+      err.custom = true;
+      throw err;
+    }
+
+    return new Response(JSON.stringify({ data: userInfo, cookie: "MONSTER" }));
+
+  } catch (e) {
+
+    //
+    // An error was caught...return an appropriate response to the client
+    //
+    let response;
+    if(e.custom){
+        return new Response(JSON.stringify({ data: e.message, error: true }), {status: 400});
+    } else {
+        return new Response(JSON.stringify({ data: "SERVER ERROR", error: true }), {status: 500});
+    }
+  }
+
+
+};
+
+
+```
+
 
