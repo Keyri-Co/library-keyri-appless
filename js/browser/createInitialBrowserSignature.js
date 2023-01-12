@@ -1,4 +1,4 @@
-import EZCrypto from "ezcrypto";
+import EZCrypto from "@justinwwolcott/ez-web-crypto";
 
 export default async (browserSignatureKeys, metadata) => {
   const ezcrypto = new EZCrypto();

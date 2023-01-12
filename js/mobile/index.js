@@ -1,5 +1,5 @@
 import EZWebAuthn from "ezwebauthn";
-import EZCrypto from "ezcrypto";
+import EZCrypto from "@justinwwolcott/ez-web-crypto";
 import EZindexDB from "ezindexdb";
 
 // ////////////////////////////////////////////////////////////////////////////

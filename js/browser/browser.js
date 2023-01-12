@@ -1,4 +1,4 @@
-import EZCrypto from "ezcrypto";
+import EZCrypto from "@justinwwolcott/ez-web-crypto";
 import createInitialBrowserSignature from "./createInitialBrowserSignature.js";
 import createFinalBrowserSignature from "./createFinalBrowserSignature.js";
 
