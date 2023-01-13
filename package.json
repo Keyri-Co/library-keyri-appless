@@ -1,6 +1,6 @@
 {
   "name": "library-keyri-appless",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Library for integrating Appless Functionality into Keyri Architecture",
   "main": "index.js",
   "devDependencies": {
