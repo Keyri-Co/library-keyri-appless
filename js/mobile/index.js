@@ -25,6 +25,8 @@ export default class ApplessMobile {
 
   #sessionData;
 
+  #onPasswordRequest;
+
   /////////////////////////////////////////////////////////////////////////////
   //
   //
@@ -37,6 +39,16 @@ export default class ApplessMobile {
     this.#database = new EZindexDB();
     this.#crypto = new EZCrypto();
 
+  }
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  //
+  //
+  /////////////////////////////////////////////////////////////////////////////
+  set onPasswordRequest (fx) {
+    console.log(fx.toString());
+    this.#onPasswordRequest = fx;
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -185,7 +197,28 @@ export default class ApplessMobile {
   //
   /////////////////////////////////////////////////////////////////////////////
   #registerUser = async (userParameters) => {
-    let registration = userParameters.registration;
+    let encrypted = userParameters.registration;
+    let password;
+
+    // If the dev provided a way to get a password from the user, use it
+    // otherwise just assume there's a blank password
+    if(!this.#onPasswordRequest){
+      password = "";
+    } else {
+      password = await this.#onPasswordRequest();
+    }
+
+    // either way, lets try decrypting it
+    try{
+      userParameters.registration = await this.#crypto.PASSWORD_DECRYPT(password, encrypted.data);
+    } catch(e) {
+      console.log("DATA DECRYPTION FAILED. WOMP WOMP!",{e});
+      throw new Error("PASSWORD DECRYPTION FAILED.");
+    }
+    //
+    // Back to normal
+    //
+    let registration = JSON.parse(userParameters.registration);
     let browserTwo = JSON.parse(atob(registration.data));
     let rpData = JSON.parse(atob(browserTwo.child.data));
     let browserData = JSON.parse(atob(rpData.child.data));
