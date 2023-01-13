@@ -7,7 +7,10 @@ export default class ApplessBrowser {
   //
   //
   /////////////////////////////////////////////////////////////////////////////
-  register = async (url, metadata) => {
+  register = async (url, metadata, password) => {
+
+    console.log({url, metadata, password});
+
     const ezcrypto = new EZCrypto();
     const browserSignatureKeys = await ezcrypto.EcMakeSigKeys(false);
 
@@ -36,6 +39,19 @@ export default class ApplessBrowser {
     //
     // 3.) BROWSER GETS IT, SIGNS IT, SENDS IT TO MOBILE VIA IFRAME,WebSockets, AND ¡MAGIC!
     //
-    return await createFinalBrowserSignature(browserSignatureKeys, rpResponse);
+    let returnValue = await createFinalBrowserSignature(browserSignatureKeys, rpResponse);
+    //
+    //    return {
+    //      data: browserData,
+    //      signature: browserSignature,
+    //    };
+    //
+
+    if(password){
+      returnValue.encrypted = true;
+      returnValue.data = await ezcrypto.PASSWORD_ENCRYPT(password, returnValue.data);
+    }
+
+    return returnValue;
   };
 }

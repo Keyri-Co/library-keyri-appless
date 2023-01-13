@@ -93,7 +93,7 @@ export default class LocalAppless {
   // REGISTER YOUR MOBILE-DEVICE
   //
   /////////////////////////////////////////////////////////////////////////////
-  registerMobile = async (METADATA, IFRAME) => {
+  registerMobile = async (METADATA, IFRAME, PASSWORD) => {
 
     if(!METADATA){
       throw new Error("Second Argument (METADATA) Cannot Be Blank! RP Needs Some Way To Identify Who Is Making Request.");
@@ -114,6 +114,10 @@ export default class LocalAppless {
     iFrameArgs.register = true;
     iFrameArgs.RP_API_URL = this.#RP_REGISTER_API_URL;
     iFrameArgs.METADATA = METADATA;
+
+    if(PASSWORD){
+      iFrameArgs.PASSWORD = PASSWORD;
+    }
 
     let queryString = new URLSearchParams(iFrameArgs);
     IFRAME.src = `./KeyriQR.html?${queryString}`;
