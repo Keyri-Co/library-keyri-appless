@@ -8,7 +8,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "@justinwwolcott/ez-web-crypto": "^1.0.1",
+    "@justinwwolcott/ez-web-crypto": "*",
     "ezindexdb": "github:Keyri-Co/EZIndexDB",
     "ezwebauthn": "github:Keyri-Co/EZWebAuthn"
   },
