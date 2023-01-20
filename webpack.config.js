@@ -1,8 +1,8 @@
 const path = require("path");
 
-var applessLocal = {
+const applessLocal = {
   devtool: "source-map",
-  entry: "./js/browser/index.js",
+  entry: "./src/js/browser/index.js",
   mode: "production",
   output: {
     filename: "appless-local.min.js",
@@ -18,12 +18,9 @@ var applessLocal = {
   },
 };
 
-
-
-
-var applessMobile = {
+const applessMobile = {
   devtool: "source-map",
-  entry: "./js/mobile/index.js",
+  entry: "./src/js/mobile/index.js",
   mode: "production",
   output: {
     filename: "appless-mobile.min.js",
@@ -39,4 +36,22 @@ var applessMobile = {
   },
 };
 
-module.exports = [applessMobile, applessLocal];
+const allInOne = {
+  devtool: "source-map",
+  entry: "./src/index.js",
+  mode: "production",
+  output: {
+    filename: "index.min.js",
+    path: path.resolve(__dirname, "dist"),
+    pathinfo: true,
+    sourceMapFilename: "index.min.js.map",
+    library: "Appless",
+    libraryTarget: "umd",
+    globalObject: 'this'
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"],
+  },
+};
+
+module.exports = [applessMobile, applessLocal, allInOne];

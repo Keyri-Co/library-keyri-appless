@@ -2,7 +2,7 @@
   "name": "library-keyri-appless",
   "version": "1.0.1",
   "description": "Library for integrating Appless Functionality into Keyri Architecture",
-  "main": "index.js",
+  "main": "./dist/index.min.js",
   "devDependencies": {
     "webpack": "^5.72.1",
     "webpack-cli": "^4.9.2"
@@ -14,5 +14,8 @@
   },
   "scripts": {
     "build": "webpack"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
