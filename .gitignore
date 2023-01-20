@@ -6,4 +6,5 @@ docs/styles
 configs/*.js
 dist/*.map
 dist/*.txt
+dist/*.js
 package-lock.json
