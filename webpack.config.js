@@ -39,4 +39,26 @@ var applessMobile = {
   },
 };
 
-module.exports = [applessMobile, applessLocal];
+
+
+var mainModule = {
+  devtool: "source-map",
+  entry: "./index.js",
+  mode: "production",
+  output: {
+    filename: "main.min.js",
+    path: path.resolve(__dirname, "dist"),
+    pathinfo: true,
+    sourceMapFilename: "main.min.js.map",
+    library: {
+      name: "ApplessAppless",
+      type: "umd"
+    }
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"],
+  },
+};
+
+
+module.exports = [applessMobile, applessLocal, mainModule];
