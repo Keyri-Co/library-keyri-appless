@@ -1,7 +1,7 @@
 import ApplessBrowser from "./browser";
 import ApplessMobile from "../mobile";
 
-export default class LocalAppless {
+export default class ApplessLocal {
 
     #browser;
     #mobile;
