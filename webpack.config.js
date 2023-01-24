@@ -49,6 +49,9 @@ const allInOne = {
     libraryTarget: "umd",
     globalObject: 'this'
   },
+  optimization: {
+    minimize: false
+ },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
