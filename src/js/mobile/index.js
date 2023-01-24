@@ -267,11 +267,11 @@ export default class ApplessMobile {
         }
       ],
       timeout: 60000,
-      attestation: "indirect",
+      attestation: "none",
       excludeCredentials: [],
       authenticatorSelection: {
         requireResidentKey: true,
-        userVerification: "preferred",
+        userVerification: "none",
       },
     };
 
