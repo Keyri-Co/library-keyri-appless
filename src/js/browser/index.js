@@ -76,16 +76,7 @@ export default class ApplessLocal {
   // REGISTER YOUR MOBILE-DEVICE
   //
   /////////////////////////////////////////////////////////////////////////////
-  registerMobile = async (METADATA, IFRAME, PASSWORD) => {
-
-    if(!METADATA){
-      throw new Error("Second Argument (METADATA) Cannot Be Blank! RP Needs Some Way To Identify Who Is Making Request.");
-    }
-
-    if(!IFRAME){
-      throw new Error("Third Argument (IFRAME) Cannot Be Blank. I need Something to Hit");
-    }
-    
+  registerMobile = (METADATA, PASSWORD) => {
 
     //
     // Reload the IFRAME with new ARGS via its src attr
@@ -103,9 +94,8 @@ export default class ApplessLocal {
     }
 
     let queryString = new URLSearchParams(iFrameArgs);
-    IFRAME.src = `./KeyriQR.html?${queryString}`;
-    return true;
 
+    return queryString;
   }
 
 
