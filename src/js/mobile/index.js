@@ -271,7 +271,7 @@ export default class ApplessMobile {
       excludeCredentials: [],
       authenticatorSelection: {
         requireResidentKey: true,
-        userVerification: "none",
+        userVerification: "discouraged",
       },
     };
 
