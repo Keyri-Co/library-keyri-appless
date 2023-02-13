@@ -1,7 +1,7 @@
 import ApplessBrowser from "./browser";
-import ApplessMobile from "../mobile/index";
+import ApplessMobile from "../mobile";
 
-export default class LocalAppless {
+export default class ApplessLocal {
 
     #browser;
     #mobile;
@@ -26,23 +26,6 @@ export default class LocalAppless {
         this.#browser = new ApplessBrowser();
         this.#mobile = new ApplessMobile();
 
-      //
-      // Listen for window messages and intercept anything coming across
-      // that's a "session_validate" from the normal Keyri Process.
-      //
-      // If its flagged for "appless"; we'll pick it off and route it
-      // bespoke
-      //
-        window.onmessage = async (e) => {
-          if(e.data?.keyri == true && e.data?.error == false && e.data?.type == "session_validate"){
-            let tmp = JSON.parse(e.data.data);
-            
-            if(tmp?.validationFormat == "keyri-appless"){
-              await this.rp_validate_data(tmp);
-            }
-
-          }
-        }
     }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -93,16 +76,7 @@ export default class LocalAppless {
   // REGISTER YOUR MOBILE-DEVICE
   //
   /////////////////////////////////////////////////////////////////////////////
-  registerMobile = async (METADATA, IFRAME, PASSWORD) => {
-
-    if(!METADATA){
-      throw new Error("Second Argument (METADATA) Cannot Be Blank! RP Needs Some Way To Identify Who Is Making Request.");
-    }
-
-    if(!IFRAME){
-      throw new Error("Third Argument (IFRAME) Cannot Be Blank. I need Something to Hit");
-    }
-    
+  registerMobile = (METADATA, PASSWORD) => {
 
     //
     // Reload the IFRAME with new ARGS via its src attr
@@ -120,9 +94,8 @@ export default class LocalAppless {
     }
 
     let queryString = new URLSearchParams(iFrameArgs);
-    IFRAME.src = `./KeyriQR.html?${queryString}`;
-    return true;
 
+    return queryString;
   }
 
 
