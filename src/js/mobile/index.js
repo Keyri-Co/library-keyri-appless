@@ -262,40 +262,12 @@ export default class ApplessMobile {
           type: "public-key",
         },
         {
-          alg: -8,
-          type: "public-key",
-        },
-        {
-          alg: -36,
-          type: "public-key",
-        },
-        {
-          alg: -37,
-          type: "public-key",
-        },
-        {
-          alg: -38,
-          type: "public-key",
-        },
-        {
-          alg: -39,
-          type: "public-key",
-        },
-        {
           alg: -257,
           type: "public-key",
-        },
-        {
-          alg: -258,
-          type: "public-key",
-        },
-        {
-          alg: -259,
-          type: "public-key",
-        },
+        }
       ],
       timeout: 60000,
-      attestation: "direct",
+      attestation: "none",
       excludeCredentials: [],
       authenticatorSelection: {
         requireResidentKey: true,
