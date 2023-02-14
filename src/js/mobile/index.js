@@ -2,6 +2,8 @@ import EZWebAuthn from "ezwebauthn";
 import EZCrypto from "@justinwwolcott/ez-web-crypto";
 import EZindexDB from "ezindexdb";
 
+import { getSessionData } from "./getSessionData.mjs";
+
 // ////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////
 //
@@ -12,6 +14,8 @@ export default class ApplessMobile {
   #env;
   #appKey;
   #sessionId;
+
+  #radio;
 
   #local = false;
 
@@ -39,7 +43,30 @@ export default class ApplessMobile {
     this.#database = new EZindexDB();
     this.#crypto = new EZCrypto();
 
+    this.#radio = document.createDocumentFragment();
+
   }
+
+  // //////////////////////////////////////////////////////////////////////////
+  // //////////////////////////////////////////////////////////////////////////
+  // //////////////////////////////////////////////////////////////////////////
+  //
+  on = (t, e) => {
+    this.#radio.addEventListener(t, e);
+  };
+
+  // //////////////////////////////////////////////////////////////////////////
+  // //////////////////////////////////////////////////////////////////////////
+  // //////////////////////////////////////////////////////////////////////////
+  // Internal method to broadcast custom events when needed
+  //
+  #broadcast = (t, e) => {
+    this.#radio.dispatchEvent(
+      new CustomEvent(t, {
+        detail: e,
+      })
+    );
+  };
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -57,32 +84,25 @@ export default class ApplessMobile {
   /////////////////////////////////////////////////////////////////////////////
   start = async(local = false) => {
 
-    this.#local = local;
-    this.#database = new EZindexDB();
-
-    //
-    // Instantiate our connection to the database;
-    //
-    await this.#database.start("mobile", "credentials");
-
-    // ////////////////////////////////////////////////////////
-    // GET THE KEYS OUT OF THE DATABASE IF THEY ALREADY EXIST
-    // ////////////////////////////////////////////////////////
-
     let signingKeys;
     let encryptionKeys;
 
+
+    this.#local = local;
+    this.#database = new EZindexDB();
+
+    // Instantiate our connection to the database;
+    await this.#database.start("mobile", "credentials");
+
+    // GET THE KEYS OUT OF THE DATABASE IF THEY ALREADY EXIST
     try {
       signingKeys = await this.#database.reads("credentials", "signingKeys");
-      encryptionKeys = await this.#database.reads(
-        "credentials",
-        "encryptionKeys"
-      );
-    } catch (e) {}
+      encryptionKeys = await this.#database.reads("credentials","encryptionKeys");
+    } catch (e) {
+      this.#broadcast("error", e);
+    }
 
-    // ////////////////////////////////////////////////////////
     // IF THEY DON'T EXIST, CREATE THEM AND STORE THEM IN THE DB
-    // ////////////////////////////////////////////////////////
     if (typeof signingKeys == "undefined") {
       signingKeys = await this.#crypto.EcMakeSigKeys(false);
       signingKeys.id = "signingKeys";
@@ -94,7 +114,7 @@ export default class ApplessMobile {
         await this.#database.creates("credentials", signingKeys);
         await this.#database.creates("credentials", encryptionKeys);
       } catch (e) {
-        console.error("INDEXDB ERROR", e);
+        this.#broadcast("error",e);
       }
     }
 
@@ -113,11 +133,7 @@ export default class ApplessMobile {
   //
   /////////////////////////////////////////////////////////////////////////////
   register = async (registrationData = false) => {
-    // ////////////////////////////////////////////////////////
-    // IF WE'RE ON A MOBILE DATA, GET DATA OUT OF THE REST INFO
-    // ////////////////////////////////////////////////////////
       return await this.#registerUser({registration: registrationData})
-
   };
 
 
@@ -397,16 +413,6 @@ export default class ApplessMobile {
 
   };
 
-  /////////////////////////////////////////////////////////////////////////////
-  //
-  //
-  /////////////////////////////////////////////////////////////////////////////
-  #webauthAuthenticate = async (data) => {
-    //
-    // Return whatever we got from the API
-    //
-    await this.#postSessionData(data);
-  };
 
   /////////////////////////////////////////////////////////////////////////////
   //
