@@ -1,7 +1,7 @@
 import EZWebAuthn from 'ezwebauthn'
 import EZCrypto from '@justinwwolcott/ez-web-crypto'
 import EZindexDB from 'ezindexdb'
-import {getKeys} from "./getKeys.mjs";
+import { getKeys } from './getKeys.mjs'
 
 import { getSessionData } from './getSessionData.mjs'
 
@@ -95,76 +95,20 @@ export default class ApplessMobile {
     //
     /////////////////////////////////////////////////////////////////////////////
     start = async (local = false) => {
-
         this.#local = local
-        const {signingKeys, encryptionKeys} = await getKeys();
+        const { signingKeys, encryptionKeys } = await getKeys()
 
         this.#keys.signingKeys = signingKeys
         this.#keys.encryptionKeys = encryptionKeys
 
         if (!this.#local) {
-            const {sessionId, userParameters} = await getSessionData(signingKeys.publicKey, this.#env, this.#appKey);
-            
-            console.log("OUTSIDE",{sessionId, userParameters});
-            
-            //return await this.#getSessionData();
-        }
-    }
+            const { sessionId, userParameters } = await getSessionData(signingKeys.publicKey, this.#env, this.#appKey)
 
-    /////////////////////////////////////////////////////////////////////////////
-    //
-    //
-    /////////////////////////////////////////////////////////////////////////////
-    #getSessionData = async () => {
-        //
-        // Pull the session ID off the URL we're on
-        //
-        let queryStringData = Object.fromEntries(Array.from(new URL(document.location).searchParams))
-
-        this.#sessionId = queryStringData.sessionId
-        //
-        // Use headers to communicate with the API so they know who
-        // we are...
-        //
-        let headers = new Headers({
-            'x-mobile-id': this.#keys.signingKeys.publicKey,
-        })
-
-        //
-        // Options for loading
-        //
-        let opts = {
-            mode: 'cors',
-            method: 'GET',
-            headers,
-        }
-
-        //
-        // THIS IS THE STANDARD KEYRI-REST-GET API CALL...
-        //
-        this.#sessionData = await fetch(
-            `https://${this.#env}.api.keyri.com/api/v1/session/${this.#sessionId}?appKey=${this.#appKey}`,
-            opts
-        ).then(async (data) => {
-            return await data.json()
-        })
-
-        //
-        // Since we're really in Dev, throw all of this junk onto the
-        // screen
-        //
-        console.log(this.#sessionData)
-
-        //
-        // We're ASSUMING this is what's being sent back by our API
-        //
-        let userParameters = atob(this.#sessionData?.userParameters?.base64EncodedData)
-        userParameters = JSON.parse(userParameters)
-
-        if (userParameters?.register == 'true') {
-            return await this.#registerUser(userParameters)
-        } else {
-            return await this.#authUser(userParameters)
+            if (userParameters?.register == 'true') {
+                return await this.#registerUser(userParameters)
+            } else {
+                return await this.#authUser(userParameters)
+            }
         }
     }
 
