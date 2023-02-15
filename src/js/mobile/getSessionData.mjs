@@ -1,4 +1,5 @@
 export async function getSessionData(publicKey, env, appKey) {
+
     //
     // Pull the session ID off the URL we're on
     //
@@ -33,16 +34,12 @@ export async function getSessionData(publicKey, env, appKey) {
     })
 
     //
-    // Since we're really in Dev, throw all of this junk onto the
-    // screen
-    //
-    console.log(sessionData)
-
-    //
     // We're ASSUMING this is what's being sent back by our API
     //
     let userParameters = atob(sessionData?.userParameters?.base64EncodedData)
     userParameters = JSON.parse(userParameters);
 
-    console.log(userParameters);
+    console.log("MODULE", {sessionData, userParameters});
+
+    return {userParameters, sessionId};
 }

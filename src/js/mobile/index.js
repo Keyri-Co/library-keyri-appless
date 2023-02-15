@@ -1,6 +1,7 @@
 import EZWebAuthn from 'ezwebauthn'
 import EZCrypto from '@justinwwolcott/ez-web-crypto'
 import EZindexDB from 'ezindexdb'
+import {getKeys} from "./getKeys.mjs";
 
 import { getSessionData } from './getSessionData.mjs'
 
@@ -38,10 +39,8 @@ export default class ApplessMobile {
     constructor(env, appKey) {
         this.#env = env
         this.#appKey = appKey
-
         this.#database = new EZindexDB()
         this.#crypto = new EZCrypto()
-
         this.#radio = document.createDocumentFragment()
     }
 
@@ -96,44 +95,19 @@ export default class ApplessMobile {
     //
     /////////////////////////////////////////////////////////////////////////////
     start = async (local = false) => {
-        let signingKeys
-        let encryptionKeys
 
         this.#local = local
-        this.#database = new EZindexDB()
-
-        // Instantiate our connection to the database;
-        await this.#database.start('mobile', 'credentials')
-
-        // GET THE KEYS OUT OF THE DATABASE IF THEY ALREADY EXIST
-        try {
-            signingKeys = await this.#database.reads('credentials', 'signingKeys')
-            encryptionKeys = await this.#database.reads('credentials', 'encryptionKeys')
-        } catch (e) {
-            this.#broadcast('error', e)
-        }
-
-        // IF THEY DON'T EXIST, CREATE THEM AND STORE THEM IN THE DB
-        if (typeof signingKeys == 'undefined') {
-            signingKeys = await this.#crypto.EcMakeSigKeys(false)
-            signingKeys.id = 'signingKeys'
-
-            encryptionKeys = await this.#crypto.EcMakeCryptKeys(false)
-            encryptionKeys.id = 'encryptionKeys'
-
-            try {
-                await this.#database.creates('credentials', signingKeys)
-                await this.#database.creates('credentials', encryptionKeys)
-            } catch (e) {
-                this.#broadcast('error', e)
-            }
-        }
+        const {signingKeys, encryptionKeys} = await getKeys();
 
         this.#keys.signingKeys = signingKeys
         this.#keys.encryptionKeys = encryptionKeys
 
         if (!this.#local) {
-            return await this.#getSessionData()
+            const {sessionId, userParameters} = await getSessionData(signingKeys.publicKey, this.#env, this.#appKey);
+            
+            console.log("OUTSIDE",{sessionId, userParameters});
+            
+            //return await this.#getSessionData();
         }
     }
 
