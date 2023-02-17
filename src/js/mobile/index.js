@@ -13,32 +13,23 @@ import { getSessionData } from './getSessionData.mjs'
 // ////////////////////////////////////////////////////////////////////////////
 export default class ApplessMobile {
     #env
-    #appKey
     #sessionId
-
     #radio
-
     #local = false
-
-    #database
     #crypto
-
     #keys = {
         signingKeys: {},
         encryptionKeys: {},
     }
-
     #sessionData
-
-    #onPasswordRequest
+    #passwordHandler;
 
     /////////////////////////////////////////////////////////////////////////////
     //
     //
     /////////////////////////////////////////////////////////////////////////////
-    constructor(env, appKey) {
+    constructor(env) {
         this.#env = env
-        this.#appKey = appKey
         this.#database = new EZindexDB()
         this.#crypto = new EZCrypto()
         this.#radio = document.createDocumentFragment()
@@ -83,11 +74,12 @@ export default class ApplessMobile {
 
     /////////////////////////////////////////////////////////////////////////////
     //
+    // This is a function the dev provides. IF we need a password, this is the function
+    // that is called to retrieve it from the user
     //
     /////////////////////////////////////////////////////////////////////////////
-    set onPasswordRequest(fx) {
-        console.log(fx.toString())
-        this.#onPasswordRequest = fx
+    set passwordHandler(fx) {
+        this.#passwordHandler = fx;
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -102,7 +94,7 @@ export default class ApplessMobile {
         this.#keys.encryptionKeys = encryptionKeys
 
         if (!this.#local) {
-            const { sessionId, userParameters } = await getSessionData(signingKeys.publicKey, this.#env, this.#appKey)
+            const { sessionId, userParameters } = await getSessionData(signingKeys.publicKey, this.#env)
 
             if (userParameters?.register == 'true') {
                 return await this.#registerUser(userParameters)
@@ -117,15 +109,15 @@ export default class ApplessMobile {
     //
     /////////////////////////////////////////////////////////////////////////////
     #registerUser = async (userParameters) => {
-        let encrypted = userParameters.registration
-        let password
+        let encrypted = userParameters.registration;
+        let password;
 
         // If the dev provided a way to get a password from the user, use it
         // otherwise just assume there's a blank password
-        if (!this.#onPasswordRequest) {
+        if (!this.#passwordHandler) {
             password = ''
         } else {
-            password = await this.#onPasswordRequest()
+            password = await this.#passwordHandler()
         }
 
         // either way, lets try decrypting it

@@ -1,4 +1,6 @@
-export async function getSessionData(publicKey, env, appKey) {
+import {EZCrypto} from "@justinwwolcott/ez-web-crypto";
+export async function getSessionData(publicKey, env) {
+
     let sessionData
     let userParameters;
     //
@@ -27,7 +29,7 @@ export async function getSessionData(publicKey, env, appKey) {
     //
     // THIS IS THE STANDARD KEYRI-REST-GET API CALL...
     //
-    let url = `https://${env}.api.keyri.com/api/v1/session/${sessionId}?appKey=${appKey}`
+    let url = `https://${env}.api.keyri.com/api/v1/session/${sessionId}`
 
     sessionData = await fetch(url, opts)
 
