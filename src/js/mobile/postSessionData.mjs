@@ -1,12 +1,15 @@
-export async function postSessionData (data) {
+import EZCrypto from '@justinwwolcott/ez-web-crypto'
+
+export async function postSessionData(data, myPrivateKey, myPublicKey, sessionData, sessionId, env) {
+    //
+    // 0.) Instantiate EZCrypto
+    //
+    const crypto = new EZCrypto();
+
     //
     // 1.) Encrypt some data
     //
-    let encryptionData = await this.#crypto.HKDFEncrypt(
-        this.#keys.encryptionKeys.privateKey,
-        this.#sessionData.browserPublicKey,
-        btoa(JSON.stringify(data))
-    )
+    let encryptionData = await crypto.HKDFEncrypt(myPrivateKey, sessionData.browserPublicKey, btoa(JSON.stringify(data)))
 
     //
     // 2.) Build out the POST object
@@ -18,7 +21,7 @@ export async function postSessionData (data) {
         },
         browserData: {
             ...encryptionData,
-            publicKey: this.#keys.encryptionKeys.publicKey,
+            publicKey: myPublicKey,
         },
         errorMsg: '',
         errors: false,
@@ -32,20 +35,19 @@ export async function postSessionData (data) {
         method: 'POST',
         body: JSON.stringify({
             ...postBody,
-            __salt: this.#sessionData.__salt,
-            __hash: this.#sessionData.__hash,
+            __salt: sessionData.__salt,
+            __hash: sessionData.__hash,
         }),
     }
 
     //
     // 4.) ...SEND IT
     //
-    let postData = await fetch(
-        `https://${this.#env}.api.keyri.com/api/v1/session/${this.#sessionId}`,
-        postOpts
-    ).then(async (data) => {
-        return await data.json()
-    })
+    let postData = await fetch(`https://${env}.api.keyri.com/api/v1/session/${sessionId}`, postOpts).then(
+        async (data) => {
+            return await data.json()
+        }
+    )
 
     window.close()
 }

@@ -47,5 +47,5 @@ export async function getSessionData(publicKey, env) {
     userParameters = atob(sessionData?.userParameters?.base64EncodedData)
     userParameters = JSON.parse(userParameters)
 
-    return { userParameters, sessionId }
+    return { sessionData, userParameters, sessionId }
 }

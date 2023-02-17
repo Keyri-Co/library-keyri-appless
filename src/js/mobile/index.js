@@ -2,8 +2,8 @@ import EZWebAuthn from 'ezwebauthn'
 import EZCrypto from '@justinwwolcott/ez-web-crypto'
 import EZindexDB from 'ezindexdb'
 import { getKeys } from './getKeys.mjs'
-
 import { getSessionData } from './getSessionData.mjs'
+import { postSessionData } from './postSessionData.mjs'
 
 // ////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////
@@ -12,7 +12,8 @@ import { getSessionData } from './getSessionData.mjs'
 // ////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////
 export default class ApplessMobile {
-    #env
+    #database;
+    #env;
     #sessionId
     #radio
     #local = false
@@ -22,7 +23,7 @@ export default class ApplessMobile {
         encryptionKeys: {},
     }
     #sessionData
-    #passwordHandler;
+    #passwordHandler
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -79,7 +80,7 @@ export default class ApplessMobile {
     //
     /////////////////////////////////////////////////////////////////////////////
     set passwordHandler(fx) {
-        this.#passwordHandler = fx;
+        this.#passwordHandler = fx
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -94,7 +95,10 @@ export default class ApplessMobile {
         this.#keys.encryptionKeys = encryptionKeys
 
         if (!this.#local) {
-            const { sessionId, userParameters } = await getSessionData(signingKeys.publicKey, this.#env)
+            const { sessionData, sessionId, userParameters } = await getSessionData(signingKeys.publicKey, this.#env);
+
+            this.#sessionId = sessionId;
+            this.#sessionData = sessionData;
 
             if (userParameters?.register == 'true') {
                 return await this.#registerUser(userParameters)
@@ -109,8 +113,8 @@ export default class ApplessMobile {
     //
     /////////////////////////////////////////////////////////////////////////////
     #registerUser = async (userParameters) => {
-        let encrypted = userParameters.registration;
-        let password;
+        let encrypted = userParameters.registration
+        let password
 
         // If the dev provided a way to get a password from the user, use it
         // otherwise just assume there's a blank password
@@ -221,7 +225,15 @@ export default class ApplessMobile {
         // Return whatever we got from the API
         //
         if (!this.#local) {
-            await this.#postSessionData(output)
+            await postSessionData(
+                output,
+                this.#keys.encryptionKeys.privateKey,
+                this.#keys.encryptionKeys.publicKey,
+                this.#sessionData,
+                this.#sessionId,
+                this.#env
+            );
+            // await this.#postSessionData(output)
         } else {
             return output
         }
@@ -278,65 +290,19 @@ export default class ApplessMobile {
             // Inform the developwer the type of operation is appless
             //
             output.validationFormat = 'keyri-appless'
-            await this.#postSessionData(output)
+
+            await postSessionData(
+                output,
+                this.#keys.encryptionKeys.privateKey,
+                this.#keys.encryptionKeys.publicKey,
+                this.#sessionData,
+                this.#sessionId,
+                this.#env
+            );
         } else {
             return output
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////
-    //
-    //
-    /////////////////////////////////////////////////////////////////////////////
-    #postSessionData = async (data) => {
-        //
-        // 1.) Encrypt some data
-        //
-        let encryptionData = await this.#crypto.HKDFEncrypt(
-            this.#keys.encryptionKeys.privateKey,
-            this.#sessionData.browserPublicKey,
-            btoa(JSON.stringify(data))
-        )
-
-        //
-        // 2.) Build out the POST object
-        //
-        let postBody = {
-            apiData: {
-                associationKey: 'WEBSOCKET-TEST-SCRIPT',
-                publicUserId: 'public-User-ID',
-            },
-            browserData: {
-                ...encryptionData,
-                publicKey: this.#keys.encryptionKeys.publicKey,
-            },
-            errorMsg: '',
-            errors: false,
-        }
-
-        //
-        // 3.) Add to the POST body, with salt and hash
-        //
-        let postOpts = {
-            mode: 'cors',
-            method: 'POST',
-            body: JSON.stringify({
-                ...postBody,
-                __salt: this.#sessionData.__salt,
-                __hash: this.#sessionData.__hash,
-            }),
-        }
-
-        //
-        // 4.) ...SEND IT
-        //
-        let postData = await fetch(
-            `https://${this.#env}.api.keyri.com/api/v1/session/${this.#sessionId}`,
-            postOpts
-        ).then(async (data) => {
-            return await data.json()
-        })
-
-        window.close()
-    }
+    
 }
