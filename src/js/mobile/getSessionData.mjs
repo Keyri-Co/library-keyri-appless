@@ -1,8 +1,6 @@
-import {EZCrypto} from "@justinwwolcott/ez-web-crypto";
 export async function getSessionData(publicKey, env) {
-
     let sessionData
-    let userParameters;
+    let userParameters
     //
     // Pull the session ID off the URL we're on
     //
@@ -33,13 +31,12 @@ export async function getSessionData(publicKey, env) {
 
     sessionData = await fetch(url, opts)
 
-    if(sessionData?.ok === false){
-        sessionData = await sessionData.json();
-        throw new Error(sessionData.message);
+    if (sessionData?.ok === false) {
+        sessionData = await sessionData.json()
+        throw new Error(sessionData.message)
     } else {
-        sessionData = await sessionData.json();
+        sessionData = await sessionData.json()
     }
-
 
     //
     // We're ASSUMING this is what's being sent back by our API

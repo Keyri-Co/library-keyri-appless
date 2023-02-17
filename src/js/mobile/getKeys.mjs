@@ -35,6 +35,5 @@ export async function getKeys(){
             throw new Error(e);
         }
     }
-    console.log( {signingKeys, encryptionKeys} );
     return {signingKeys, encryptionKeys};
 }

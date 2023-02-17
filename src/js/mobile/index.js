@@ -4,6 +4,7 @@ import EZindexDB from 'ezindexdb'
 import { getKeys } from './getKeys.mjs'
 import { getSessionData } from './getSessionData.mjs'
 import { postSessionData } from './postSessionData.mjs'
+import { authUser } from './authUser.mjs'
 
 // ////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////
@@ -14,16 +15,17 @@ import { postSessionData } from './postSessionData.mjs'
 export default class ApplessMobile {
     #database;
     #env;
-    #sessionId
-    #radio
-    #local = false
-    #crypto
+    #sessionId;
+    #radio;
+    #local = false;
+    #crypto;
+    #sessionData;
+    #passwordHandler;
     #keys = {
         signingKeys: {},
         encryptionKeys: {},
-    }
-    #sessionData
-    #passwordHandler
+    };
+
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -70,7 +72,11 @@ export default class ApplessMobile {
     //
     /////////////////////////////////////////////////////////////////////////////
     authenticate = async () => {
-        return await this.#authUser()
+        try{
+            return await authUser();
+        } catch(e){
+            console.log({ERROR: e});
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -95,15 +101,20 @@ export default class ApplessMobile {
         this.#keys.encryptionKeys = encryptionKeys
 
         if (!this.#local) {
-            const { sessionData, sessionId, userParameters } = await getSessionData(signingKeys.publicKey, this.#env);
 
+            const { sessionData, sessionId, userParameters } = await getSessionData(signingKeys.publicKey, this.#env);
             this.#sessionId = sessionId;
             this.#sessionData = sessionData;
 
             if (userParameters?.register == 'true') {
                 return await this.#registerUser(userParameters)
             } else {
-                return await this.#authUser(userParameters)
+                try{
+                    return await authUser(userParameters, this.#keys, sessionId, sessionData, this.#env, local);
+                } catch(e){
+                    console.log({ERROR: e});
+                }
+
             }
         }
     }
@@ -233,76 +244,11 @@ export default class ApplessMobile {
                 this.#sessionId,
                 this.#env
             );
-            // await this.#postSessionData(output)
         } else {
             return output
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////
-    //
-    //
-    /////////////////////////////////////////////////////////////////////////////
-    #authUser = async (userParameters) => {
-        //
-        // 1.) Generic Auth Options
-        //
-        let data = btoa(
-            JSON.stringify({ timestamp: new Date().getTime(), publicKey: this.#keys.signingKeys.publicKey })
-        )
-        let signature = await this.#crypto.EcSignData(this.#keys.signingKeys.privateKey, data)
-        let challenge = btoa(JSON.stringify({ data, signature, publicKey: this.#keys.signingKeys.publicKey }))
-
-        let authoptions = {
-            challenge,
-            rpId: document.location.origin.replace(/^.*?\/\//, ''),
-            userVerification: 'discouraged',
-            timeout: 60000,
-            requireResidentKey: true,
-        }
-
-        //
-        // 2.) WebAuthn Get Auth
-        //
-        window.focus()
-        const ezwebauthn = new EZWebAuthn()
-        const authenticatorData = await ezwebauthn.startAuthentication(authoptions)
-
-        //
-        // 3.) Verify it with the API
-        //
-        let output = await fetch('https://c4xfkg8ea4.execute-api.us-east-2.amazonaws.com/prod/v1/browser/verify/', {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(authenticatorData),
-        }).then(async (data) => {
-            return await data.json()
-        })
-
-        //
-        // Return whatever we got from the API
-        //
-        if (!this.#local) {
-            //
-            // Inform the developwer the type of operation is appless
-            //
-            output.validationFormat = 'keyri-appless'
-
-            await postSessionData(
-                output,
-                this.#keys.encryptionKeys.privateKey,
-                this.#keys.encryptionKeys.publicKey,
-                this.#sessionData,
-                this.#sessionId,
-                this.#env
-            );
-        } else {
-            return output
-        }
-    }
 
     
 }
