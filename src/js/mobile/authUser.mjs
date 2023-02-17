@@ -2,23 +2,23 @@ import EZCrypto from '@justinwwolcott/ez-web-crypto'
 import EZWebAuthn from 'ezwebauthn'
 import { postSessionData } from './postSessionData.mjs'
 export async function authUser(userParameters, keys, sessionId, sessionData, env, local) {
-
     //
     // 0.) Instantiate Crypto
     //
-    const crypto = new EZCrypto();
+    const crypto = new EZCrypto()
 
     //
     // 1.) Generic Auth Options
     //
     let data = btoa(JSON.stringify({ timestamp: new Date().getTime(), publicKey: keys.signingKeys.publicKey }))
-    let signature = await crypto.EcSignData(keys.signingKeys.privateKey , data)
+    let signature = await crypto.EcSignData(keys.signingKeys.privateKey, data)
     let challenge = btoa(JSON.stringify({ data, signature, publicKey: keys.signingKeys.publicKey }))
 
     let authoptions = {
         challenge,
         rpId: document.location.host,
         userVerification: 'discouraged',
+        attestation: false,
         timeout: 60000,
         requireResidentKey: true,
     }

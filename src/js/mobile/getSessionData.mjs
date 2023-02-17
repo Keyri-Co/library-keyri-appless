@@ -15,21 +15,19 @@ export async function getSessionData(publicKey, env) {
     // Use headers to communicate with the API so they know who
     // we are...
     //
-    let headers = new Headers({
-        'x-mobile-id': publicKey,
-    })
+    let headers = new Headers({'x-mobile-id': publicKey});
 
     //
     // Options for loading
     //
-    let opts = { mode: 'cors', method: 'GET', headers }
+    let opts = { mode: 'cors', method: 'GET', headers };
 
     //
     // THIS IS THE STANDARD KEYRI-REST-GET API CALL...
     //
-    let url = `https://${env}.api.keyri.com/api/v1/session/${sessionId}`
+    let url = `https://${env}.api.keyri.com/api/v1/session/${sessionId}`;
 
-    sessionData = await fetch(url, opts)
+    sessionData = await fetch(url, opts);
 
     if (sessionData?.ok === false) {
         sessionData = await sessionData.json()

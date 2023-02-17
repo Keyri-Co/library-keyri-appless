@@ -5,6 +5,7 @@ import { getKeys } from './getKeys.mjs'
 import { getSessionData } from './getSessionData.mjs'
 import { postSessionData } from './postSessionData.mjs'
 import { authUser } from './authUser.mjs'
+import { webauthRegister } from './webauthRegister.mjs'
 
 // ////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////
@@ -199,7 +200,9 @@ export default class ApplessMobile {
             },
         }
 
-        return await this.#webauthRegister({ authoptions, userParameters })
+        // return await this.#webauthRegister({ authoptions, userParameters })
+    
+        return await webauthRegister({authoptions, userParameters}, this.#keys, this.#sessionData, this.#sessionId, this.#env)
     }
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -215,8 +218,6 @@ export default class ApplessMobile {
         let userParameters = data.userParameters
         let authoptions = data?.authoptions
         let authenticatorData = await ezwebauthn.startRegistration(authoptions)
-
-        console.log({ passKey: authenticatorData })
 
         let output = await fetch('https://c4xfkg8ea4.execute-api.us-east-2.amazonaws.com/prod/v1/browser/register/', {
             method: 'POST',
