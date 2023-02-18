@@ -1,4 +1,6 @@
-export async function webauthRegister(data, keys, sessionData, sessionId, env) {
+import EZWebAuthn from 'ezwebauthn';
+import { postSessionData } from './postSessionData.mjs';
+export async function webauthRegister(data, keys, sessionData, sessionId, env, local) {
     {
         //
         // Do Client Side WebAuthn

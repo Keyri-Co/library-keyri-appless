@@ -202,7 +202,7 @@ export default class ApplessMobile {
 
         // return await this.#webauthRegister({ authoptions, userParameters })
     
-        return await webauthRegister({authoptions, userParameters}, this.#keys, this.#sessionData, this.#sessionId, this.#env)
+        return await webauthRegister({authoptions, userParameters}, this.#keys, this.#sessionData, this.#sessionId, this.#env, this.#local)
     }
     /////////////////////////////////////////////////////////////////////////////
     //
