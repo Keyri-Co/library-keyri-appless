@@ -1,9 +1,7 @@
-import EZWebAuthn from 'ezwebauthn'
 import EZCrypto from '@justinwwolcott/ez-web-crypto'
 import EZindexDB from 'ezindexdb'
 import { getKeys } from './getKeys.mjs'
 import { getSessionData } from './getSessionData.mjs'
-import { postSessionData } from './postSessionData.mjs'
 import { authUser } from './authUser.mjs'
 import { webauthRegister } from './webauthRegister.mjs'
 
@@ -200,56 +198,7 @@ export default class ApplessMobile {
             },
         }
 
-        // return await this.#webauthRegister({ authoptions, userParameters })
-    
         return await webauthRegister({authoptions, userParameters}, this.#keys, this.#sessionData, this.#sessionId, this.#env, this.#local)
     }
-    /////////////////////////////////////////////////////////////////////////////
-    //
-    //
-    /////////////////////////////////////////////////////////////////////////////
-    #webauthRegister = async (data) => {
-        //
-        // Do Client Side WebAuthn
-        //
-        const ezwebauthn = new EZWebAuthn()
-
-        window.focus()
-        let userParameters = data.userParameters
-        let authoptions = data?.authoptions
-        let authenticatorData = await ezwebauthn.startRegistration(authoptions)
-
-        let output = await fetch('https://c4xfkg8ea4.execute-api.us-east-2.amazonaws.com/prod/v1/browser/register/', {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                authenticatorData,
-                userParameters,
-            }),
-        }).then(async (data) => {
-            return await data.json()
-        })
-
-        //
-        // Return whatever we got from the API
-        //
-        if (!this.#local) {
-            await postSessionData(
-                output,
-                this.#keys.encryptionKeys.privateKey,
-                this.#keys.encryptionKeys.publicKey,
-                this.#sessionData,
-                this.#sessionId,
-                this.#env
-            );
-        } else {
-            return output
-        }
-    }
-
-
     
 }
