@@ -31,10 +31,10 @@ export default class ApplessMobile {
     //
     /////////////////////////////////////////////////////////////////////////////
     constructor(env) {
-        this.#env = env
-        this.#database = new EZindexDB()
-        this.#crypto = new EZCrypto()
-        this.#radio = document.createDocumentFragment()
+        this.#env = env;
+        this.#database = new EZindexDB();
+        this.#crypto = new EZCrypto();
+        this.#radio = new EventTarget();
     }
 
     // //////////////////////////////////////////////////////////////////////////
