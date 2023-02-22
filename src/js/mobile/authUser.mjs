@@ -47,7 +47,7 @@ export async function authUser(userParameters, keys, sessionId, sessionData, env
     //
     // Return whatever we got from the API
     //
-    if (!local) {
+    if (local === false) {
         //
         // Inform the developwer the type of operation is appless
         //

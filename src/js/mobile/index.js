@@ -72,7 +72,7 @@ export default class ApplessMobile {
     /////////////////////////////////////////////////////////////////////////////
     authenticate = async () => {
         try{
-            return await authUser();
+            return await authUser(undefined, this.#keys, undefined, undefined, this.#env, undefined);
         } catch(e){
             console.log({ERROR: e});
         }
