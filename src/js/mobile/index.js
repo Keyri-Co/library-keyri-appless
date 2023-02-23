@@ -12,29 +12,30 @@ import { webauthRegister } from './webauthRegister.mjs'
 // ////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////
 export default class ApplessMobile {
-    #database;
-    #env;
-    #sessionId;
-    #radio;
-    #local = false;
-    #crypto;
-    #sessionData;
-    #passwordHandler;
+    #database
+    #env
+    #sessionId
+    #sessionData
+    #userParameters;
+    #radio
+    #local = false
+    #crypto
+
+    #passwordHandler
     #keys = {
         signingKeys: {},
         encryptionKeys: {},
-    };
-
+    }
 
     /////////////////////////////////////////////////////////////////////////////
     //
     //
     /////////////////////////////////////////////////////////////////////////////
     constructor(env) {
-        this.#env = env;
-        this.#database = new EZindexDB();
-        this.#crypto = new EZCrypto();
-        this.#radio = new EventTarget();
+        this.#env = env
+        this.#database = new EZindexDB()
+        this.#crypto = new EZCrypto()
+        this.#radio = new EventTarget()
     }
 
     // //////////////////////////////////////////////////////////////////////////
@@ -71,10 +72,10 @@ export default class ApplessMobile {
     //
     /////////////////////////////////////////////////////////////////////////////
     authenticate = async () => {
-        try{
-            return await authUser(undefined, this.#keys, undefined, undefined, this.#env, undefined);
-        } catch(e){
-            console.log({ERROR: e});
+        try {
+            return await authUser(undefined, this.#keys, undefined, undefined, this.#env, undefined)
+        } catch (e) {
+            console.log({ ERROR: e })
         }
     }
 
@@ -100,23 +101,31 @@ export default class ApplessMobile {
         this.#keys.encryptionKeys = encryptionKeys
 
         if (!this.#local) {
+            const { sessionData, sessionId, userParameters } = await getSessionData(signingKeys.publicKey, this.#env)
+            this.#sessionId = sessionId
+            this.#sessionData = sessionData
+            this.#userParameters = userParameters;
+            return {sessionData, sessionId, userParameters};
+        }
+    }
 
-            const { sessionData, sessionId, userParameters } = await getSessionData(signingKeys.publicKey, this.#env);
-            this.#sessionId = sessionId;
-            this.#sessionData = sessionData;
 
-            if (userParameters?.register == 'true') {
-                return await this.#registerUser(userParameters)
-            } else {
-                try{
-                    return await authUser(userParameters, this.#keys, sessionId, sessionData, this.#env, local);
-                } catch(e){
-                    console.log({ERROR: e});
-                }
-
+    /////////////////////////////////////////////////////////////////////////////
+    //
+    //
+    /////////////////////////////////////////////////////////////////////////////
+    finish = async () => {
+        if (this.#userParameters?.register == 'true') {
+            return await this.#registerUser(this.#userParameters)
+        } else {
+            try {
+                return await authUser(this.#userParameters, this.#keys, this.#sessionId, this.#sessionData, this.#env, this.#local)
+            } catch (e) {
+                console.log({ ERROR: e })
             }
         }
     }
+
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -198,7 +207,13 @@ export default class ApplessMobile {
             },
         }
 
-        return await webauthRegister({authoptions, userParameters}, this.#keys, this.#sessionData, this.#sessionId, this.#env, this.#local)
+        return await webauthRegister(
+            { authoptions, userParameters },
+            this.#keys,
+            this.#sessionData,
+            this.#sessionId,
+            this.#env,
+            this.#local
+        )
     }
-    
 }
