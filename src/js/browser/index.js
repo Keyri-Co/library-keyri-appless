@@ -36,12 +36,10 @@ export default class ApplessLocal {
     register = async (METADATA) => {
 
       if(!METADATA){
-        throw new Error("Second Argument (METADATA) Cannot Be Blank! RP Needs Some Way To Identify Who Is Making Request.");
+        throw new Error("First Argument (METADATA) Cannot Be Blank! RP Needs Some Way To Identify Who Is Making Request.");
       }
 
-      //
       // Start the mobile script to expose its methods locally
-      //
       await this.#mobile.start(true);
       
       // Back and forth between the browser and RP and Browser
@@ -88,11 +86,8 @@ export default class ApplessLocal {
     iFrameArgs.register = true;
     iFrameArgs.RP_API_URL = this.#RP_REGISTER_API_URL;
     iFrameArgs.METADATA = METADATA;
-
-    if(PASSWORD){
-      iFrameArgs.PASSWORD = PASSWORD;
-    }
-
+    iFrameArgs.PASSWORD = PASSWORD;
+  
     let queryString = new URLSearchParams(iFrameArgs);
 
     return queryString;

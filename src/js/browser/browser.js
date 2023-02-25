@@ -54,8 +54,6 @@ export default class ApplessBrowser {
 
     returnValue = await ezcrypto.PASSWORD_ENCRYPT(password, returnValue);
 
-    console.log( {encrypted: true, data: returnValue} );
-
     return {encrypted: true, data: returnValue};
   };
 }

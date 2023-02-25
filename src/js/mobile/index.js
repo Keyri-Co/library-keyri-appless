@@ -21,7 +21,6 @@ export default class ApplessMobile {
     #local = false
     #crypto
 
-    #passwordHandler
     #keys = {
         signingKeys: {},
         encryptionKeys: {},
@@ -81,21 +80,11 @@ export default class ApplessMobile {
 
     /////////////////////////////////////////////////////////////////////////////
     //
-    // This is a function the dev provides. IF we need a password, this is the function
-    // that is called to retrieve it from the user
-    //
-    /////////////////////////////////////////////////////////////////////////////
-    set passwordHandler(fx) {
-        this.#passwordHandler = fx
-    }
-
-    /////////////////////////////////////////////////////////////////////////////
-    //
     //
     /////////////////////////////////////////////////////////////////////////////
     start = async (local = false) => {
         this.#local = local
-        const { signingKeys, encryptionKeys } = await getKeys()
+        const { signingKeys, encryptionKeys } = await getKeys();
 
         this.#keys.signingKeys = signingKeys
         this.#keys.encryptionKeys = encryptionKeys
@@ -114,9 +103,10 @@ export default class ApplessMobile {
     //
     //
     /////////////////////////////////////////////////////////////////////////////
-    finish = async () => {
+    finish = async (password = "") => {
+
         if (this.#userParameters?.register == 'true') {
-            return await this.#registerUser(this.#userParameters)
+            return await this.#registerUser(this.#userParameters, password);
         } else {
             try {
                 return await authUser(this.#userParameters, this.#keys, this.#sessionId, this.#sessionData, this.#env, this.#local)
@@ -131,32 +121,36 @@ export default class ApplessMobile {
     //
     //
     /////////////////////////////////////////////////////////////////////////////
-    #registerUser = async (userParameters) => {
-        let encrypted = userParameters.registration
-        let password
+    #registerUser = async (userParameters, password) => {
 
-        // If the dev provided a way to get a password from the user, use it
-        // otherwise just assume there's a blank password
-        if (!this.#passwordHandler) {
-            password = ''
-        } else {
-            password = await this.#passwordHandler()
-        }
+        //
+        // Show password
+        //
+        let encrypted = userParameters.registration;
+
+        console.log({userParameters, password, encrypted});
+
 
         // either way, lets try decrypting it
         try {
-            userParameters.registration = await this.#crypto.PASSWORD_DECRYPT(password, encrypted.data)
+            userParameters.registration = await this.#crypto.PASSWORD_DECRYPT(password, encrypted.data);
+            console.log({registration: userParameters.registration, password, encrypted: encrypted.data});
         } catch (e) {
             console.log('DATA DECRYPTION FAILED. WOMP WOMP!', { e })
-            throw new Error('PASSWORD DECRYPTION FAILED.')
+            throw new Error('PASSWORD DECRYPTION FAILED.');
+            return false;
         }
+
+
         //
         // Back to normal
         //
-        let registration = JSON.parse(userParameters.registration)
-        let browserTwo = JSON.parse(atob(registration.data))
-        let rpData = JSON.parse(atob(browserTwo.child.data))
-        let browserData = JSON.parse(atob(rpData.child.data))
+        let registration = JSON.parse(userParameters.registration);
+        let browserTwo = JSON.parse(atob(registration.data));
+        let rpData = JSON.parse(atob(browserTwo.child.data));
+        let browserData = JSON.parse(atob(rpData.child.data));
+
+        console.log({registration, browserTwo, rpData, browserData, password, encrypted, decrypted: userParameters.registration});
 
         // Build the data for mobile to sign
         let mobileData = {
@@ -171,8 +165,6 @@ export default class ApplessMobile {
         let mobileSignature = await this.#crypto.EcSignData(this.#keys.signingKeys.privateKey, mobileData)
 
         let mobileOut = JSON.stringify({ data: mobileData, signature: mobileSignature })
-
-        console.log({ userParameters, mobileData, browserTwo, rpData, browserData })
 
         // base64 our mobile data in the normal structure
         userParameters.registration = btoa(mobileOut)
